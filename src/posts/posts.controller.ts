@@ -1,35 +1,35 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, Query} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpCode, Param, Patch, Post} from '@nestjs/common';
 import { PostsService } from "./posts.service";
 import { CreatePostDto } from "./dto/create-post.dto";
 import {UpdatePostDto} from "./dto/update-post.dto";
+import { Post as Entity } from "./entity/post.entity"
 
 @Controller('posts')
 export class PostsController {
     constructor(private postsService: PostsService) {}
     @Get()
-    findAll(@Query('sort') sort: 'ascending' | 'descending' = 'descending') {
-        console.log(sort);
-        return this.postsService.findAll(sort);
+    findAll(): Promise<Entity[]> {
+        return this.postsService.findAll();
     }
 
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id') id: number): Promise<Entity | null> {
         return this.postsService.findOne(id);
     }
 
     @Post()
-    create(@Body() input: CreatePostDto ) {
-        console.log(input);
+    create(@Body() input: CreatePostDto ) : Promise<Entity> {
         return this.postsService.create(input);
     }
 
     @Patch(':id')
-    update(@Param('id') id: number, @Body() updatePostDto: UpdatePostDto) {
+    update(@Param('id') id: number, @Body() updatePostDto: UpdatePostDto): Promise<Entity> {
         return this.postsService.update(+id, updatePostDto);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.postsService.remove(+id);
+    @HttpCode(204)
+    remove(@Param('id') id: number): Promise<void> {
+        return this.postsService.remove(id);
     }
 }

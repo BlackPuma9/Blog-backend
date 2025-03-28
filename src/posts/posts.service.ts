@@ -1,37 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import { Post } from "./entity/post.entity";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
+import {InjectRepository} from "@nestjs/typeorm";
+import {Repository} from 'typeorm';
+
 
 @Injectable()
 export class PostsService {
-    private posts: Post[] = [];
 
-    async findAll(sort: 'ascending' | 'descending' = 'ascending') {
-        const sortAsc = (a: Post, b: Post) => (a.title > b.title ? 1 : -1);
-        const sortDesc = (a: Post, b: Post) => (a.title < b.title ? 1 : -1);
+    constructor(
+        @InjectRepository(Post)
+        private postsRepository: Repository<Post>,
+    ) {}
 
-        return sort === 'ascending'
-        ? this.posts.sort(sortAsc)
-        : this.posts.sort(sortDesc);
+    async findAll(): Promise<Post[]> {
+        return this.postsRepository.find();
     }
 
-    async findOne(id: number) {
-        return this.posts.find(post => post.id === id);
+    async findOne(id: number) : Promise<Post | null> {
+        return this.postsRepository.findOneBy({ id })
     }
 
-    async create(createPostDto: CreatePostDto) {
-        const newPost = { ...createPostDto, id: 1, createdAt: new Date(), updatedAt: new Date() };
-        this.posts.push(newPost);
-
-        return newPost;
+    async create(createPostDto: CreatePostDto) : Promise<Post> {
+        const newPost = { ...createPostDto };
+        return this.postsRepository.save(newPost);
     }
 
-    async update(id: number, updatePostDto: UpdatePostDto) {
-        console.log(id, updatePostDto);
+    async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
+       const post = await this.findOne(id);
+       if (!post) {
+           throw new NotFoundException();
+       }
+       if (updatePostDto?.title) {
+           post.title = updatePostDto.title;
+       }
+       if(updatePostDto?.description) {
+           post.description = updatePostDto.description;
+       }
+       return this.postsRepository.save(post);
     }
 
-    async remove(id: number) {
-        console.log('Post removed', id);
+    async remove(id: number): Promise<void> {
+        await this.postsRepository.delete(id);
     }
 }

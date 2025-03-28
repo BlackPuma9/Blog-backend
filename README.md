@@ -89,20 +89,38 @@ _______________________________
 Develop a backend API for the blog using Nest.js.
 
 ## CRUD Posts
-GET /posts 
-GET /posts/id
+`GET /posts`
 
-Post /posts
-Patch /posts/id
-Delete /posts/id
+`GET /posts/id`
+
+`Post /posts`
+
+`Patch /posts/id`
+
+`Delete /posts/id`
 
 POST
-id,
+`id,
 title,
 description
 createdAt,
-updatedAt
+updatedAt`
 
 Make a dockerCompose with the database. Select on Postgres.
 Use typeOrm to work with the database.
+
+Tips:
+1. To launch database type `docker-compose up`
+2. Styles. In postgres database - `snake_case`. In js - `camelCase`
+
+# OneToOne, HasOne relation
+
+Потрібно зробити табличку з категоріями (Category). У кожного поста може бути тільки 1 категорія. А в свою чергу категорія може бути прив'язана к багатьом постам.
+
+`id, title, created_at`
+
+Class Entity - Category. DB table - categories
+
+Relation по посту категорія. І відповідно зробити CRUD for category (/categories).
+Все що стосується категорії це має бути окремим модулем.
 
